@@ -3,6 +3,130 @@
 #include <Adafruit_NeoPixel.h>
 #include <elapsedMillis.h>
 
+
+//--------------------------------------------------------------------------------------------------
+
+// TODO RR: relocate Ceiled
+template <uint16_t MAX> struct CappedNumber
+{
+    CappedNumber(const CappedNumber &other) { value = other.value; }
+    CappedNumber(uint16_t val) { value = val; }
+
+    uint16_t value{ 0 };
+
+    CappedNumber &operator++()
+    {
+        value++;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator--()
+    {
+        value--;
+        trim();
+        return *this;
+    }
+
+    CappedNumber operator++(int)
+    {
+        uint16_t temp{ value };
+        value++;
+        trim();
+        return temp;
+    }
+    CappedNumber operator--(int)
+    {
+        uint16_t temp{ value };
+        value--;
+        trim();
+        return temp;
+    }
+
+    CappedNumber &operator+(uint16_t inc)
+    {
+        value += inc;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator-(uint16_t dec)
+    {
+        value -= dec;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator+(const CappedNumber &other)
+    {
+        value += other.value;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator-(const CappedNumber &other)
+    {
+        value -= other.value;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator=(const CappedNumber &other)
+    {
+        value = other.value;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator=(uint16_t val)
+    {
+        value = val;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator-=(const CappedNumber &other)
+    {
+        value -= other.value;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator+=(const CappedNumber &other)
+    {
+        value += other.value;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator-=(const int16_t val)
+    {
+        value -= val;
+        trim();
+        return *this;
+    }
+
+    CappedNumber &operator+=(int16_t val)
+    {
+        value += val;
+        trim();
+        return *this;
+    }
+
+    bool operator==(const CappedNumber &other) { return value == other.value; }
+
+    bool operator!=(const CappedNumber &other) { return !operator==(other); }
+
+    bool operator==(uint16_t val) { return value == val; }
+
+    bool operator!=(uint16_t val) { return !operator==(val); }
+
+    operator uint16_t() { return value; }
+
+private:
+    inline void trim() { value %= MAX; }
+};
+
 //--------------------------------------------------------------------------------------------------
 
 template <uint16_t LED_COUNT = 16, uint8_t LED_PIN = D0, neoPixelType LED_TYPE = NEO_GRB + NEO_KHZ400>
@@ -76,14 +200,13 @@ private:
 
         Adafruit_NeoPixel &strip;
         uint32_t color{ 0 };
-        uint8_t begin : 4;
-        uint8_t end : 4;
 
-        // TODO RR: this impl. implies it works only for 16 LEDs
-        //! 4-bit pixel iterator with intended over-/underflow
-        uint8_t pixel_iterator : 4;
-        //! toggle bit to ensures alternate access (left, right
+        CappedNumber<LED_COUNT> begin;
+        CappedNumber<LED_COUNT> end;
+        CappedNumber<LED_COUNT> pixel_iterator;
+        //! toggle bit to ensures alternate access (left, right)
         uint8_t toggle : 1;
+        uint8_t _stuff : 7;
     };
 
     uint8_t overrideColorChannelBrightness(uint8_t color);
@@ -93,7 +216,6 @@ private:
     //! Puts the given color on the whole strip wrt. to the current brightness.
     //! \param color the color on strip
     void colorWipe(uint32_t color);
-
 
     void theaterChase(uint32_t color, uint16_t wait_ms);
 
@@ -422,7 +544,7 @@ template <uint16_t LC, uint8_t LP, neoPixelType LT> void PixelRing<LC, LP, LT>::
 
 template <uint16_t LC, uint8_t LP, neoPixelType LT>
 PixelRing<LC, LP, LT>::ArcBasedView::ArcBasedView(Adafruit_NeoPixel &strip)
-: strip(strip), begin(0), end(static_cast<uint8_t>(strip.numPixels() - 1)), pixel_iterator(0), toggle(0)
+: strip(strip), begin(0), end(LC - 1), pixel_iterator(0), toggle(0)
 {
 }
 
@@ -448,10 +570,12 @@ void PixelRing<LC, LP, LT>::ArcBasedView::process()
     do
     {
         strip.setPixelColor(pixel_iterator, *color_ptr);
-        strip.show();
+        
         if(pixel_iterator == end)
             color_ptr = &black;
     } while(++pixel_iterator != begin);
+
+    strip.show();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -495,7 +619,7 @@ void PixelRing<LC, LP, LT>::ArcBasedView::incrementArcByOne(bool do_increment)
     if(!do_increment && begin == end)
         return;
 
-    uint8_t previous_begin = begin, previous_end = end;
+    uint16_t previous_begin = begin, previous_end = end;
 
     // do the increment
     if(toggle++ == 0)
