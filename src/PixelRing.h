@@ -228,7 +228,7 @@ template <uint16_t LC> void PixelRing<LC>::colorWipe(uint32_t color)
 
 // -------------------------------------------------------------------------------------------------
 
-template <> void PixelRing<>::theaterChase(uint32_t color, uint16_t wait_ms)
+template <uint16_t LC> void PixelRing<LC>::theaterChase(uint32_t color, uint16_t wait_ms)
 {
     if(time_elapsed < wait_ms)
         return;
@@ -260,7 +260,7 @@ template <> void PixelRing<>::theaterChase(uint32_t color, uint16_t wait_ms)
 
 // -------------------------------------------------------------------------------------------------
 
-template <> void PixelRing<>::rainbow(uint16_t wait_ms)
+template <uint16_t LC> void PixelRing<LC>::rainbow(uint16_t wait_ms)
 {
     if(time_elapsed < wait_ms)
         return;
@@ -299,7 +299,7 @@ template <> void PixelRing<>::rainbow(uint16_t wait_ms)
 
 // -------------------------------------------------------------------------------------------------
 
-template <> void PixelRing<>::theaterChaseRainbow(uint16_t wait_ms)
+template<uint16_t LC> void PixelRing<LC>::theaterChaseRainbow(uint16_t wait_ms)
 {
     if(time_elapsed < wait_ms)
         return;
@@ -387,7 +387,7 @@ template <uint16_t LC> void PixelRing<LC>::shift(int8_t pixels) { arc_view.rotat
 template <uint16_t LC> void PixelRing<LC>::nextScene()
 {
     auto next = [&]() {
-        return static_cast<PixelRing<LC>::SceneMode>(static_cast<uint8_t >(last_scene_mode) + 1);
+        return static_cast<PixelRing<LC>::SceneMode>(static_cast<uint8_t>(last_scene_mode) + 1);
     };
 
     last_scene_mode = next();
