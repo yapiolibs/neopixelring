@@ -1,0 +1,27 @@
+{
+  "name": "NeoPixelRing",
+  "keywords": "LED, WS2812, WS2812B",
+  "description": "set of scenes for WS2812 LED strips or NeoPixel Ring",
+  "homepage": "https://github.com/yapiolibs/neopixelring",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yapiolibs/neopixelring.git"
+  },
+  "authors": [
+    {
+        "name": "Raoul Rubien",
+        "url": "https://github.com/rubienr",
+        "maintainer" : "true"
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "Adafruit NeoPixel",
+      "authors": "Adafruit",
+      "frameworks": "arduino"
+    }
+  ],
+  "version": "0.1",
+  "frameworks": "arduino",
+  "platforms": "espressif8266, esp32"
+}
