@@ -570,7 +570,7 @@ void PixelRing<LC, LP, LT>::ArcBasedView::process()
     do
     {
         strip.setPixelColor(pixel_iterator, *color_ptr);
-        
+
         if(pixel_iterator == end)
             color_ptr = &black;
     } while(++pixel_iterator != begin);
