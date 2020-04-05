@@ -5,7 +5,7 @@
 
 //--------------------------------------------------------------------------------------------------
 
-template <uint16_t LED_COUNT = 16> class PixelRing
+template <uint16_t LED_COUNT = 16, uint8_t LED_PIN = D0> class PixelRing
 {
 public:
     enum class SceneMode
@@ -100,7 +100,7 @@ private:
     void theaterChaseRainbow(uint16_t wait_ms);
 
     using Strip = Adafruit_NeoPixel;
-    Strip strip{ LED_COUNT, D4, (NEO_GRB) + NEO_KHZ800 };
+    Strip strip{ LED_COUNT, LED_PIN, (NEO_GRB) + NEO_KHZ800 };
 
     //! 0-100 [%]
     uint8_t brightness{ 100 };
@@ -117,7 +117,7 @@ private:
 
 
 // -------------------------------------------------------------------------------------------------
-template <uint16_t LC> void PixelRing<LC>::setup()
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::setup()
 {
     Serial.println("PixelRing::setup");
     strip.begin();
@@ -126,7 +126,7 @@ template <uint16_t LC> void PixelRing<LC>::setup()
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::process(PixelRing::SceneMode scene_mode)
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::process(PixelRing::SceneMode scene_mode)
 {
     last_scene_mode = (scene_mode == SceneMode::None) ? last_scene_mode : scene_mode;
     switch(last_scene_mode)
@@ -169,7 +169,7 @@ template <uint16_t LC> void PixelRing<LC>::process(PixelRing::SceneMode scene_mo
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::incrementBrightness(int8_t increment)
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::incrementBrightness(int8_t increment)
 {
     const int8_t max_step = 20;
     auto cap = [](int8_t &value, int8_t min, int8_t max) {
@@ -191,11 +191,12 @@ template <uint16_t LC> void PixelRing<LC>::incrementBrightness(int8_t increment)
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::maxBrightness() { brightness = 100; }
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::maxBrightness() { brightness = 100; }
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> uint8_t PixelRing<LC>::overrideColorChannelBrightness(uint8_t color_value)
+template <uint16_t LC, uint8_t LP>
+uint8_t PixelRing<LC, LP>::overrideColorChannelBrightness(uint8_t color_value)
 {
     uint16_t color =
     ((uint16_t)brightness_override * (uint16_t)brightness * (uint16_t)color_value) / (uint16_t)100;
@@ -205,7 +206,8 @@ template <uint16_t LC> uint8_t PixelRing<LC>::overrideColorChannelBrightness(uin
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> uint32_t PixelRing<LC>::overrideColorBrightness(uint32_t color)
+template <uint16_t LC, uint8_t LP>
+uint32_t PixelRing<LC, LP>::overrideColorBrightness(uint32_t color)
 {
     uint8_t r = static_cast<uint8_t>((color & 0x00ff0000) >> 16);
     uint8_t g = static_cast<uint8_t>((color & 0x0000ff00) >> 8);
@@ -217,7 +219,7 @@ template <uint16_t LC> uint32_t PixelRing<LC>::overrideColorBrightness(uint32_t 
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::colorWipe(uint32_t color)
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::colorWipe(uint32_t color)
 {
     for(uint16_t i = 0; i < strip.numPixels(); i++)
     {
@@ -228,7 +230,8 @@ template <uint16_t LC> void PixelRing<LC>::colorWipe(uint32_t color)
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::theaterChase(uint32_t color, uint16_t wait_ms)
+template <uint16_t LC, uint8_t LP>
+void PixelRing<LC, LP>::theaterChase(uint32_t color, uint16_t wait_ms)
 {
     if(time_elapsed < wait_ms)
         return;
@@ -260,7 +263,7 @@ template <uint16_t LC> void PixelRing<LC>::theaterChase(uint32_t color, uint16_t
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::rainbow(uint16_t wait_ms)
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::rainbow(uint16_t wait_ms)
 {
     if(time_elapsed < wait_ms)
         return;
@@ -299,7 +302,7 @@ template <uint16_t LC> void PixelRing<LC>::rainbow(uint16_t wait_ms)
 
 // -------------------------------------------------------------------------------------------------
 
-template<uint16_t LC> void PixelRing<LC>::theaterChaseRainbow(uint16_t wait_ms)
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::theaterChaseRainbow(uint16_t wait_ms)
 {
     if(time_elapsed < wait_ms)
         return;
@@ -338,7 +341,7 @@ template<uint16_t LC> void PixelRing<LC>::theaterChaseRainbow(uint16_t wait_ms)
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> bool PixelRing<LC>::toggleOnOff()
+template <uint16_t LC, uint8_t LP> bool PixelRing<LC, LP>::toggleOnOff()
 {
     if(brightness_override == 1)
     {
@@ -354,7 +357,7 @@ template <uint16_t LC> bool PixelRing<LC>::toggleOnOff()
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::off()
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::off()
 {
     brightness_override = 0;
     Serial.println("PixelRing::off: turning off");
@@ -362,7 +365,7 @@ template <uint16_t LC> void PixelRing<LC>::off()
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::on()
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::on()
 {
     brightness_override = 1;
     Serial.println("PixelRing::on: turning on");
@@ -370,24 +373,27 @@ template <uint16_t LC> void PixelRing<LC>::on()
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::incrementWidth(int8_t pixels)
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::incrementWidth(int8_t pixels)
 {
     arc_view.incrementArc(pixels);
 }
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::fullWidth() { arc_view.fullWidth(); }
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::fullWidth() { arc_view.fullWidth(); }
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::shift(int8_t pixels) { arc_view.rotate(pixels); }
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::shift(int8_t pixels)
+{
+    arc_view.rotate(pixels);
+}
 
 // -------------------------------------------------------------------------------------------------
-template <uint16_t LC> void PixelRing<LC>::nextScene()
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::nextScene()
 {
     auto next = [&]() {
-        return static_cast<PixelRing<LC>::SceneMode>(static_cast<uint8_t>(last_scene_mode) + 1);
+        return static_cast<PixelRing<LC, LP>::SceneMode>(static_cast<uint8_t>(last_scene_mode) + 1);
     };
 
     last_scene_mode = next();
@@ -400,15 +406,15 @@ template <uint16_t LC> void PixelRing<LC>::nextScene()
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC>
-PixelRing<LC>::ArcBasedView::ArcBasedView(Adafruit_NeoPixel &strip)
+template <uint16_t LC, uint8_t LP>
+PixelRing<LC, LP>::ArcBasedView::ArcBasedView(Adafruit_NeoPixel &strip)
 : strip(strip), begin(0), end(static_cast<uint8_t>(strip.numPixels() - 1)), pixel_iterator(0), toggle(0)
 {
 }
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::ArcBasedView::process(uint32_t new_color)
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::ArcBasedView::process(uint32_t new_color)
 {
     this->color = new_color;
     process();
@@ -417,7 +423,7 @@ template <uint16_t LC> void PixelRing<LC>::ArcBasedView::process(uint32_t new_co
 // -------------------------------------------------------------------------------------------------
 
 
-template <uint16_t LC> void PixelRing<LC>::ArcBasedView::process()
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::ArcBasedView::process()
 {
     uint32_t *color_ptr = &color;
     uint32_t black = Strip::Color(0, 0, 0);
@@ -434,7 +440,7 @@ template <uint16_t LC> void PixelRing<LC>::ArcBasedView::process()
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::ArcBasedView::rotate(int8_t pixels)
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::ArcBasedView::rotate(int8_t pixels)
 {
     begin += pixels;
     end += pixels;
@@ -442,7 +448,7 @@ template <uint16_t LC> void PixelRing<LC>::ArcBasedView::rotate(int8_t pixels)
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::ArcBasedView::incrementArc(int8_t pixels)
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::ArcBasedView::incrementArc(int8_t pixels)
 {
     Serial.print("PixelRing::ArcBasedView::incrementArc: ");
     Serial.println(pixels);
@@ -462,7 +468,8 @@ template <uint16_t LC> void PixelRing<LC>::ArcBasedView::incrementArc(int8_t pix
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::ArcBasedView::incrementArcByOne(bool do_increment)
+template <uint16_t LC, uint8_t LP>
+void PixelRing<LC, LP>::ArcBasedView::incrementArcByOne(bool do_increment)
 {
     int8_t increment = do_increment ? 1 : -1;
 
@@ -492,7 +499,7 @@ template <uint16_t LC> void PixelRing<LC>::ArcBasedView::incrementArcByOne(bool 
 
 // -------------------------------------------------------------------------------------------------
 
-template <uint16_t LC> void PixelRing<LC>::ArcBasedView::fullWidth()
+template <uint16_t LC, uint8_t LP> void PixelRing<LC, LP>::ArcBasedView::fullWidth()
 {
     begin = 0;
     end = 0;
